@@ -1,0 +1,75 @@
+/* 
+  Localizable.es.strings
+  adminUser
+
+  Created by Eduardo Carranza Maqueda on 30/03/25.
+  
+*/
+// MARK: - General
+"app_name" = "Gestión de Usuarios";
+"save" = "Guardar";
+"cancel" = "Cancelar";
+"edit" = "Editar";
+"delete" = "Eliminar";
+"confirm" = "Confirmar";
+"error" = "Error";
+"success" = "Éxito";
+"loading" = "Cargando...";
+"back" = "Volver";
+"back_to_users" = "Volver a Usuarios";
+
+// MARK: - User List
+"users_title" = "Usuarios";
+"search_users" = "Buscar usuarios";
+"no_users_found" = "No se encontraron usuarios";
+"add_user" = "Añadir Usuario";
+
+// MARK: - User Details
+"user_details" = "Detalles del Usuario";
+"username" = "Nombre de usuario";
+"name" = "Nombre";
+"email" = "Correo electrónico";
+"phone" = "Teléfono";
+"website" = "Sitio web";
+"address" = "Dirección";
+"street" = "Calle";
+"suite" = "Suite";
+"city" = "Ciudad";
+"zipcode" = "Código Postal";
+"company" = "Empresa";
+"company_name" = "Nombre de la empresa";
+"company_catchphrase" = "Eslogan";
+"company_bs" = "Negocio";
+
+// MARK: - Create/Edit User
+"create_user" = "Crear Usuario";
+"edit_user" = "Editar Usuario";
+"user_created" = "Usuario creado con éxito";
+"user_updated" = "Usuario actualizado con éxito";
+"user_deleted" = "Usuario eliminado con éxito";
+"confirm_delete" = "¿Estás seguro de que quieres eliminar este usuario?";
+"get_location" = "Obtener Ubicación Actual";
+"current_location" = "Ubicación Actual";
+"location_coordinates" = "Coordenadas:";
+
+// MARK: - Validation
+"required_field" = "Este campo es obligatorio";
+"invalid_email" = "Por favor, introduce un correo electrónico válido";
+"invalid_phone" = "Por favor, introduce un número de teléfono válido";
+
+// MARK: - Permissions
+"location_permission_title" = "Acceso a Ubicación";
+"location_permission_message" = "Esta aplicación necesita acceder a tu ubicación para obtener tus coordenadas actuales.";
+"location_permission_denied" = "Acceso a ubicación denegado. Por favor, actívalo en Ajustes para usar esta función.";
+"openSettings" = "Abrir Ajustes";
+
+// MARK: - Settings
+"settings" = "Ajustes";
+"language_settings" = "Configuración de Idioma";
+"select_language" = "Seleccionar Idioma";
+"app_restart_note" = "Algunos cambios pueden requerir reiniciar la aplicación para aplicarse completamente.";
+"about" = "Acerca de";
+"version" = "Versión";
+"developer" = "Desarrollador";
+"return_to_users" = "Volver a Usuarios";
+"language_restart_notice" = "Algunos cambios pueden requerir reiniciar la app"; 

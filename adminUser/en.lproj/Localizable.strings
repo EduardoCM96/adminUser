@@ -1,0 +1,75 @@
+/* 
+  Localizable.strings
+  adminUser
+
+  Created by Eduardo Carranza Maqueda on 30/03/25.
+  
+*/
+// MARK: - General
+"app_name" = "User Management";
+"save" = "Save";
+"cancel" = "Cancel";
+"edit" = "Edit";
+"delete" = "Delete";
+"confirm" = "Confirm";
+"error" = "Error";
+"success" = "Success";
+"loading" = "Loading...";
+"back" = "Back";
+"back_to_users" = "Back to Users";
+
+// MARK: - User List
+"users_title" = "Users";
+"search_users" = "Search users";
+"no_users_found" = "No users found";
+"add_user" = "Add User";
+
+// MARK: - User Details
+"user_details" = "User Details";
+"username" = "Username";
+"name" = "Name";
+"email" = "Email";
+"phone" = "Phone";
+"website" = "Website";
+"address" = "Address";
+"street" = "Street";
+"suite" = "Suite";
+"city" = "City";
+"zipcode" = "Zip Code";
+"company" = "Company";
+"company_name" = "Company Name";
+"company_catchphrase" = "Catchphrase";
+"company_bs" = "Business";
+
+// MARK: - Create/Edit User
+"create_user" = "Create User";
+"edit_user" = "Edit User";
+"user_created" = "User created successfully";
+"user_updated" = "User updated successfully";
+"user_deleted" = "User deleted successfully";
+"confirm_delete" = "Are you sure you want to delete this user?";
+"get_location" = "Get Current Location";
+"current_location" = "Current Location";
+"location_coordinates" = "Coordinates:";
+
+// MARK: - Validation
+"required_field" = "This field is required";
+"invalid_email" = "Please enter a valid email address";
+"invalid_phone" = "Please enter a valid phone number";
+
+// MARK: - Permissions
+"location_permission_title" = "Location Access";
+"location_permission_message" = "This app needs access to your location to get your current coordinates.";
+"location_permission_denied" = "Location access denied. Please enable it in Settings to use this feature.";
+"openSettings" = "Open Settings";
+
+// MARK: - Settings
+"settings" = "Settings";
+"language_settings" = "Language Settings";
+"select_language" = "Select Language";
+"app_restart_note" = "Some changes may require restarting the app to fully apply.";
+"about" = "About";
+"version" = "Version";
+"developer" = "Developer";
+"return_to_users" = "Return to Users";
+"language_restart_notice" = "Some changes may require restarting the app"; 
