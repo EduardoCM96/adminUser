@@ -15,28 +15,6 @@ struct UserListView: View {
         NavigationView {
             ZStack {
                 VStack {
-                    // Barra de búsqueda
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
-                        
-                        TextField("search_users".localized, text: $viewModel.searchText)
-                            .padding(.vertical, 8)
-                        
-                        if !viewModel.searchText.isEmpty {
-                            Button(action: {
-                                viewModel.searchText = ""
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.gray)
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-                    .padding()
-                    
                     if viewModel.users.isEmpty && !viewModel.isLoading {
                         VStack(spacing: 16) {
                             Image(systemName: "person.crop.circle.badge.exclamationmark")

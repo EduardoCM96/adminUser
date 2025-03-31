@@ -54,17 +54,15 @@ struct CreateUserView: View {
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.blue)
-                            .cornerRadius(10)
+                                    .cornerRadius(10)
                         }
                         
-                        if viewModel.showLocationCoordinates, let location = viewModel.currentLocation {
+                        if viewModel.showLocationCoordinates {
                             HStack {
                                 Image(systemName: "mappin.and.ellipse")
                                     .foregroundColor(.green)
                                 
-                                Text(String(format: "location_coordinates".localized,
-                                            String(format: "%.4f", location.coordinate.latitude),
-                                            String(format: "%.4f", location.coordinate.longitude)))
+                                Text(viewModel.coordinatesText)
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }

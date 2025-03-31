@@ -13,7 +13,6 @@ class UserListViewModel: ObservableObject {
     @Published var users: [User] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-    @Published var searchText: String = ""
     @Published var showDeleteConfirmation: Bool = false
     @Published var userToDelete: User?
     
@@ -24,20 +23,13 @@ class UserListViewModel: ObservableObject {
     
     init(coordinator: AppCoordinator) {
         self.coordinator = coordinator
-        
-        $searchText
-            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
-            .removeDuplicates()
-            .sink { [weak self] searchText in
-                self?.filterUsers()
-            }
-            .store(in: &cancellables)
+        loadUsers() // Cargar usuarios inmediatamente al inicializar
     }
     
     func loadUsers() {
         isLoading = true
         errorMessage = nil
-        
+        loadLocalUsers()
         apiService.getUsers()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] completion in
@@ -45,12 +37,11 @@ class UserListViewModel: ObservableObject {
                 
                 if case .failure(let error) = completion {
                     self?.errorMessage = error.localizedDescription
-                    // En caso de error, intentamos cargar desde local
-                    self?.loadLocalUsers()
                 }
             }, receiveValue: { [weak self] users in
                 self?.realmManager.saveUsers(users)
                 self?.loadLocalUsers()
+                self?.isLoading = false
             })
             .store(in: &cancellables)
     }
@@ -58,20 +49,6 @@ class UserListViewModel: ObservableObject {
     func loadLocalUsers() {
         let localUsers = realmManager.getAllUsers()
         self.users = localUsers.filter { !$0.isDeleted }
-    }
-    
-    func filterUsers() {
-        if searchText.isEmpty {
-            loadLocalUsers()
-        } else {
-            let filteredUsers = realmManager.getAllUsers().filter { user in
-                let searchLowercased = searchText.lowercased()
-                return user.name.lowercased().contains(searchLowercased) ||
-                       user.username.lowercased().contains(searchLowercased) ||
-                       user.email.lowercased().contains(searchLowercased)
-            }
-            self.users = filteredUsers
-        }
     }
     
     func showUserDetail(_ user: User) {
@@ -106,6 +83,7 @@ class UserListViewModel: ObservableObject {
                     self?.loadLocalUsers()
                 }
                 self?.showDeleteConfirmation = false
+                self?.isLoading = false
             })
             .store(in: &cancellables)
     }

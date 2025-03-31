@@ -62,59 +62,32 @@ class LocationService: NSObject, ObservableObject {
     }
     
     func requestLocationPermission() {
-        print("📱 Solicitando permisos de localización...")
-        
-        if !CLLocationManager.locationServicesEnabled() {
-            locationError = .denied
-            locationSubject.send(completion: .failure(.denied))
-            return
+        DispatchQueue.global().async {
+            if !CLLocationManager.locationServicesEnabled() {
+                DispatchQueue.main.async {
+                    self.locationError = .denied
+                    self.locationSubject.send(completion: .failure(.denied))
+                }
+                return
+            }
         }
-        
+
         switch locationManager.authorizationStatus {
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
         case .denied, .restricted:
-            locationError = .denied
-            locationSubject.send(completion: .failure(.denied))
+            self.locationError = .denied
+            self.locationSubject.send(completion: .failure(.denied))
         case .authorizedWhenInUse, .authorizedAlways:
-            locationManager.requestLocation()
+            self.getCurrentLocation()
         @unknown default:
-            locationError = .unknown
-            locationSubject.send(completion: .failure(.unknown))
+            self.locationError = .unknown
+            self.locationSubject.send(completion: .failure(.unknown))
         }
     }
     
-    func getCurrentLocation() -> AnyPublisher<CLLocation, LocationError> {
-        let publisher = PassthroughSubject<CLLocation, LocationError>()
-        
-        if !CLLocationManager.locationServicesEnabled() {
-            publisher.send(completion: .failure(.denied))
-            return publisher.eraseToAnyPublisher()
-        }
-        
-        switch locationManager.authorizationStatus {
-        case .authorizedWhenInUse, .authorizedAlways:
-            locationManager.requestLocation()
-        case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
-        case .denied, .restricted:
-            publisher.send(completion: .failure(.denied))
-        @unknown default:
-            publisher.send(completion: .failure(.unknown))
-        }
-        
-        locationSubject
-            .sink(
-                receiveCompletion: { completion in
-                    publisher.send(completion: completion)
-                },
-                receiveValue: { location in
-                    publisher.send(location)
-                }
-            )
-            .store(in: &cancellables)
-        
-        return publisher.eraseToAnyPublisher()
+    func getCurrentLocation() {
+        locationManager.requestLocation()
     }
     
     private var cancellables = Set<AnyCancellable>()
@@ -123,31 +96,50 @@ class LocationService: NSObject, ObservableObject {
 extension LocationService: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        currentLocation = location
-        locationSubject.send(location)
+        DispatchQueue.main.async {
+            self.currentLocation = location
+            self.locationSubject.send(location)
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Location error: \(error.localizedDescription)")
-        locationError = .unknown
-        locationSubject.send(completion: .failure(.unknown))
+        DispatchQueue.main.async {
+            if let clError = error as? CLError {
+                switch clError.code {
+                case .denied:
+                    self.locationError = .denied
+                    self.locationSubject.send(completion: .failure(.denied))
+                case .locationUnknown:
+                    self.locationError = .unknown
+                    self.locationSubject.send(completion: .failure(.unknown))
+                default:
+                    self.locationError = .unknown
+                    self.locationSubject.send(completion: .failure(.unknown))
+                }
+            } else {
+                self.locationError = .unknown
+                self.locationSubject.send(completion: .failure(.unknown))
+            }
+        }
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        authorizationStatus = manager.authorizationStatus
-        statusSubject.send(authorizationStatus)
-        
-        switch manager.authorizationStatus {
-        case .authorizedWhenInUse, .authorizedAlways:
-            locationManager.requestLocation()
-        case .denied, .restricted:
-            locationError = .denied
-            locationSubject.send(completion: .failure(.denied))
-        case .notDetermined:
-            break
-        @unknown default:
-            locationError = .unknown
-            locationSubject.send(completion: .failure(.unknown))
+        DispatchQueue.main.async {
+            self.authorizationStatus = manager.authorizationStatus
+            self.statusSubject.send(self.authorizationStatus)
+            
+            switch manager.authorizationStatus {
+            case .authorizedWhenInUse, .authorizedAlways:
+                self.getCurrentLocation()
+            case .denied, .restricted:
+                self.locationError = .denied
+                self.locationSubject.send(completion: .failure(.denied))
+            case .notDetermined:
+                break
+            @unknown default:
+                self.locationError = .unknown
+                self.locationSubject.send(completion: .failure(.unknown))
+            }
         }
     }
 } 

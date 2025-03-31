@@ -28,6 +28,7 @@ class CreateUserViewModel: ObservableObject {
     @Published var locationErrorMessage: String?
     @Published var currentLocation: CLLocation?
     @Published var showLocationCoordinates: Bool = false
+    @Published var coordinatesText: String = ""
     
     // Validaciones
     @Published var nameValidation: ValidationResult = ValidationResult.valid
@@ -50,11 +51,9 @@ class CreateUserViewModel: ObservableObject {
                 
                 switch status {
                 case .authorizedWhenInUse, .authorizedAlways:
-                    // Si se autoriza, solicitar la ubicación automáticamente
-                    self.requestLocation()
+                    self.showLocationAlert = false
                     
                 case .denied, .restricted:
-                    // Si se deniega, mostrar un mensaje
                     self.locationErrorMessage = NSLocalizedString("location_permission_denied", 
                                                                  tableName: "Localizable", 
                                                                  bundle: Bundle.main, 
@@ -63,13 +62,40 @@ class CreateUserViewModel: ObservableObject {
                     self.showLocationAlert = true
                     
                 case .notDetermined:
-                    // Esperando decisión del usuario
-                    break
+                    self.locationErrorMessage = NSLocalizedString("location_permission_message", 
+                                                                 tableName: "Localizable", 
+                                                                 bundle: Bundle.main, 
+                                                                 value: "Esta aplicación necesita acceder a tu ubicación para obtener tus coordenadas actuales.", 
+                                                                 comment: "")
+                    self.showLocationAlert = true
                     
                 @unknown default:
                     break
                 }
             }
+            .store(in: &cancellables)
+            
+        locationService.locationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    guard let self = self else { return }
+                    if case .failure(let error) = completion {
+                        self.locationErrorMessage = error.localizedDescription
+                        self.showLocationAlert = true
+                        self.showLocationCoordinates = false
+                    }
+                },
+                receiveValue: { [weak self] location in
+                    guard let self = self else { return }
+                    self.currentLocation = location
+                    self.showLocationCoordinates = true
+                    self.showLocationAlert = false
+                    self.coordinatesText = String(format: "Lat: %.4f, Long: %.4f",
+                                                location.coordinate.latitude,
+                                                location.coordinate.longitude)
+                }
+            )
             .store(in: &cancellables)
     }
     
@@ -84,22 +110,8 @@ class CreateUserViewModel: ObservableObject {
             }
             .assign(to: \.canSubmit, on: self)
             .store(in: &cancellables)
-        
-        // Monitorear el estado de la ubicación
+
         monitorLocationAuthorizationStatus()
-        
-        // Suscribirse a los eventos de ubicación
-        locationService.locationPublisher
-            .sink(receiveCompletion: { [weak self] completion in
-                if case .failure(let error) = completion {
-                    self?.locationErrorMessage = error.localizedDescription
-                    self?.showLocationAlert = true
-                }
-            }, receiveValue: { [weak self] location in
-                self?.currentLocation = location
-                self?.showLocationCoordinates = true
-            })
-            .store(in: &cancellables)
     }
     
     private func setupValidations() {
@@ -154,7 +166,7 @@ class CreateUserViewModel: ObservableObject {
                 
                 self?.resetForm()
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     self?.showSuccessMessage = false
                     self?.navigateBack()
                 }
@@ -205,36 +217,8 @@ class CreateUserViewModel: ObservableObject {
     }
     
     func requestLocation() {
-        // Si es la primera vez que se solicita el permiso
-        if locationService.authorizationStatus == .notDetermined {
-            showLocationAlert = true
-            locationErrorMessage = NSLocalizedString("location_permission_message", 
-                                                   tableName: "Localizable", 
-                                                   bundle: Bundle.main, 
-                                                   value: "Esta aplicación necesita acceder a tu ubicación para obtener tus coordenadas actuales.", 
-                                                   comment: "")
-            
-            // Solicitar permisos después de mostrar el mensaje
-            locationService.requestLocationPermission()
-            return
-        }
-        
-        // Para otros estados, solicitar ubicación directamente
-        locationService.getCurrentLocation()
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] completion in
-                    if case .failure(let error) = completion {
-                        self?.locationErrorMessage = error.localizedDescription
-                        self?.showLocationAlert = true
-                    }
-                },
-                receiveValue: { [weak self] location in
-                    self?.currentLocation = location
-                    self?.showLocationCoordinates = true
-                }
-            )
-            .store(in: &cancellables)
+        showLocationCoordinates = false
+        locationService.requestLocationPermission()
     }
     
     func navigateBack() {
